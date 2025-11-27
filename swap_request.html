@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แลกเปลี่ยนเวร - AUTONURSESHIFT</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+
+    <style>
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: #f8fafc;
+            -webkit-font-smoothing: antialiased;
+        }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 5rem); }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-card {
+            opacity: 0;
+            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #1e2a78, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;  
+            
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Input Styling override */
+        .flatpickr-input { background-color: white !important; }
+        
+        /* Hover Lift */
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+<header class="bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm sticky top-0 z-40">
+    <div class="max-w-screen-xl mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            
+            <a href="dashboard.html" class="flex items-center gap-2 group">
+                <div class="bg-indigo-50 p-1.5 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                    <img src="logo.png" class="w-8 h-8 object-contain" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3774/3774299.png'">
+                </div>
+                <span class="logo-text tracking-tight hidden sm:block">AUTONURSESHIFT</span>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                    <h1 class="text-sm font-bold text-gray-700">
+                        <span id="user-name-display">กำลังโหลด...</span>
+                    </h1>
+                </div>
+
+                <div class="relative">
+                    <button id="profile-menu-btn" class="flex items-center focus:outline-none">
+                        <img id="header-profile-img"
+                             class="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover ring-2 ring-gray-100 hover:ring-indigo-300 transition-all duration-300"
+                             src="https://placehold.co/100x100/EBF4FF/7F8_?text=...&font=kanit">
+                    </button>
+                    <div id="profile-dropdown" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 transform origin-top-right transition-all duration-200 opacity-0 scale-95">
+                        <div class="p-1">
+                            <a href="profile-edit.html" class="flex items-center px-3 py-2 text-sm text-gray-600 rounded-lg hover:bg-indigo-50 hover:text-indigo-600">
+                                <i class="fas fa-user-edit w-6"></i> แก้ไขโปรไฟล์
+                            </a>
+                            <button id="logout-btn" class="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">
+                                <i class="fas fa-sign-out-alt w-6"></i> ออกจากระบบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 overflow-y-auto pb-32 scroll-smooth bg-gray-50/50">
+    <div class="max-w-screen-xl mx-auto p-4 md:p-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <div class="lg:col-span-8 space-y-6">
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8 animate-card relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full bg-teal-50 opacity-50 blur-3xl"></div>
+                    
+                    <div class="relative z-10">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                            <span class="bg-teal-100 text-teal-600 w-10 h-10 rounded-xl flex items-center justify-center text-lg">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            ค้นหาเวรที่ต้องการแลก
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-6 pl-12">เลือกวันที่และกะที่คุณต้องการ เพื่อค้นหาเพื่อนร่วมงานที่ว่าง</p>
+
+                        <form id="searchForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-gray-500 ml-1">วันที่ต้องการ</label>
+                                <div class="relative">
+                                    <input type="text" id="searchDate" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all font-medium text-gray-700" placeholder="เลือกวันที่...">
+                                    <i class="fas fa-calendar absolute left-4 top-4 text-teal-500"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-gray-500 ml-1">ช่วงเวลา</label>
+                                <div class="relative">
+                                    <select id="searchShift" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 pl-11 focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none transition-all font-medium text-gray-700 cursor-pointer">
+                                        <option value="0">เลือกประเภทเวร</option>
+                                        <option value="1">☀️ เวรเช้า (08:00 - 16:00)</option>
+                                        <option value="2">🌤️ เวรบ่าย (16:00 - 00:00)</option>
+                                        <option value="3">🌙 เวรดึก (00:00 - 08:00)</option>
+                                    </select>
+                                    <i class="fas fa-clock absolute left-4 top-4 text-teal-500"></i>
+                                    <i class="fas fa-chevron-down absolute right-4 top-4 text-gray-400 text-xs pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex items-end">
+                                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-200 transition transform active:scale-95 flex items-center justify-center gap-2">
+                                    <i class="fas fa-search"></i> ค้นหาเวร
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="results-area" class="animate-card delay-100">
+                    <div class="flex items-center justify-between mb-4 px-2">
+                        <h3 class="text-lg font-bold text-gray-700">ผลการค้นหา</h3>
+                        <span class="text-xs text-gray-400 bg-white px-2 py-1 rounded-lg border border-gray-100 shadow-sm" id="result-count">0 รายการ</span>
+                    </div>
+
+                    <div id="searchResults" class="space-y-4">
+                        <div class="flex flex-col items-center justify-center py-16 bg-white rounded-3xl border border-dashed border-gray-200">
+                            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-search text-3xl text-gray-300"></i>
+                            </div>
+                            <p class="text-gray-400 font-medium">กรุณาเลือกเงื่อนไขเพื่อค้นหา</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-4 space-y-6">
+                
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 animate-card delay-200 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-bullhorn text-orange-500"></i> โพสต์ของฉัน
+                        </h3>
+                        <button onclick="openPostModal()" class="text-xs bg-orange-50 text-orange-600 hover:bg-orange-100 px-3 py-1.5 rounded-full font-bold transition">
+                            <i class="fas fa-plus mr-1"></i> โพสต์ใหม่
+                        </button>
+                    </div>
+                    
+                    <div id="my-posts-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth custom-scrollbar">
+                        <div class="animate-pulse space-y-3">
+                            <div class="h-20 bg-gray-100 rounded-xl"></div>
+                            <div class="h-20 bg-gray-100 rounded-xl"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 animate-card delay-300 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-inbox text-blue-500"></i> คำขอที่เข้ามา
+                        </h3>
+                        <span id="incoming-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm shadow-red-200">0</span>
+                    </div>
+
+                    <div id="incoming-list" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth custom-scrollbar">
+                        <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                            <i class="far fa-envelope-open text-2xl mb-2 opacity-30"></i>
+                            <span class="text-xs">ไม่มีคำขอใหม่</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 pb-safe">
+    <div class="max-w-screen-xl mx-auto grid grid-cols-5 pt-1">
+        <a href="dashboard.html" class="flex flex-col items-center justify-center p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+            <i class="fas fa-home text-lg mb-1"></i>
+            <span class="text-[10px] font-medium">หน้าหลัก</span>
+        </a>
+        <a href="swap_request.html" class="flex flex-col items-center justify-center p-2 text-indigo-600 relative">
+            <div class="absolute top-0 w-8 h-1 bg-indigo-600 rounded-b-full"></div>
+            <i class="fas fa-exchange-alt text-lg mb-1 transform scale-110"></i>
+            <span class="text-[10px] font-medium">แลกเปลี่ยน</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+            <i class="fas fa-shopping-cart text-lg mb-1"></i>
+            <span class="text-[10px] font-medium">ซื้อขาย</span>
+        </a>
+        <a href="#" class="flex flex-col items-center justify-center p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+            <i class="fas fa-chart-pie text-lg mb-1"></i>
+            <span class="text-[10px] font-medium">สถิติ</span>
+        </a>
+        <a href="schedule.html" class="flex flex-col items-center justify-center p-2 text-gray-400 hover:text-indigo-600 transition-colors">
+            <i class="fas fa-calendar-alt text-lg mb-1"></i>
+            <span class="text-[10px] font-medium">ตารางเวร</span>
+        </a>
+    </div>
+</nav>
+
+<div id="requestModal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300" id="modalContent">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h3 class="text-xl font-bold text-gray-800">ส่งคำขอแลกเวร</h3>
+                <p class="text-xs text-gray-500">กับ: <span id="modal-target-name" class="font-bold text-teal-600 text-sm">...</span></p>
+            </div>
+            <button onclick="closeRequestModal()" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="sendRequestForm" class="space-y-4">
+            <input type="hidden" id="modal-target-user-id">
+            <input type="hidden" id="modal-target-schedule-id">
+            
+            <div class="bg-teal-50 rounded-xl p-4 border border-teal-100">
+                <label class="block text-xs font-bold text-teal-800 mb-2 uppercase tracking-wide">เลือกเวรของคุณที่จะให้เขา</label>
+                <div class="relative">
+                    <select id="my-offer-shift" class="w-full bg-white border border-teal-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none appearance-none font-medium text-gray-700" required>
+                        <option value="">กำลังโหลดเวรของคุณ...</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-3.5 text-teal-300 text-xs pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">เหตุผลประกอบ (ถ้ามี)</label>
+                <textarea id="modal-reason" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none resize-none" placeholder="เช่น ติดธุระด่วน, ไม่สบาย..."></textarea>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-200 transition transform active:scale-95">
+                    <i class="fas fa-paper-plane mr-2"></i> ส่งคำขอแลกเปลี่ยน
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+
+<script>
+    const API_BASE = 'http://localhost:3000';
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkAuth();
+        setupFlatpickr();
+        setupProfileMenu();
+        
+        loadMyPosts();
+        loadIncomingRequests();
+
+        document.getElementById('searchForm').addEventListener('submit', handleSearch);
+        document.getElementById('sendRequestForm').addEventListener('submit', handleSendRequest);
+    });
+
+    function checkAuth() {
+        const userStr = localStorage.getItem('user');
+        if(!userStr) window.location.href = 'login.html';
+        currentUser = JSON.parse(userStr);
+        
+        document.getElementById('user-name-display').innerText = `สวัสดี ${currentUser.FirstName}`;
+        if(currentUser.ProfileImage) {
+            document.getElementById('header-profile-img').src = `${API_BASE}/uploads/${currentUser.ProfileImage}?t=${Date.now()}`;
+        }
+    }
+
+    function setupFlatpickr() {
+        flatpickr("#searchDate", {
+            locale: "th",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "j F Y",
+            minDate: "today",
+            disableMobile: "true"
+        });
+    }
+
+    function setupProfileMenu() {
+        const btn = document.getElementById('profile-menu-btn');
+        const menu = document.getElementById('profile-dropdown');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                setTimeout(() => {
+                    menu.classList.remove('opacity-0', 'scale-95');
+                    menu.classList.add('opacity-100', 'scale-100');
+                }, 10);
+            } else {
+                closeMenu();
+            }
+        });
+        
+        document.addEventListener('click', e => {
+            if (!btn.contains(e.target) && !menu.contains(e.target)) closeMenu();
+        });
+
+        function closeMenu() {
+            menu.classList.remove('opacity-100', 'scale-100');
+            menu.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => menu.classList.add('hidden'), 200);
+        }
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        });
+    }
+
+    // --- Search Logic ---
+    async function handleSearch(e) {
+        e.preventDefault();
+        const date = document.getElementById('searchDate').value;
+        const shiftId = document.getElementById('searchShift').value;
+        const container = document.getElementById('searchResults');
+        const countLabel = document.getElementById('result-count');
+
+        if(!date || shiftId == "0") { 
+            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบ', text: 'กรุณาเลือกวันที่และช่วงเวลา', timer: 1500, showConfirmButton: false });
+            return;
+        }
+
+        // Show Skeleton Loading
+        container.innerHTML = Array(3).fill(0).map(() => `
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 animate-pulse">
+                <div class="w-14 h-14 bg-gray-200 rounded-full"></div>
+                <div class="flex-1 space-y-2">
+                    <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+                <div class="w-24 h-10 bg-gray-200 rounded-xl"></div>
+            </div>
+        `).join('');
+
+        try {
+            // จำลอง Delay ให้ดู Smooth
+            // const res = await fetch(...) 
+            // Mock Data for Demo (เปลี่ยนเป็น fetch จริงของคุณ)
+            await new Promise(r => setTimeout(r, 800)); // Fake Delay
+
+            // สมมติ Data ที่ได้จาก API
+            /* Uncomment บรรทัดนี้เมื่อต่อ API จริง
+               const res = await fetch(`${API_BASE}/api/search-available-shifts`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ date, shiftId, requesterId: currentUser.UserID })
+               });
+               const data = await res.json();
+            */
+            
+            // Mockup Data ถ้ายังไม่มี API
+            const data = { success: true, results: [] }; // แก้เป็น [] ถ้าไม่มีข้อมูล
+
+            if(data.success && data.results.length > 0) {
+                countLabel.innerText = `${data.results.length} รายการ`;
+                container.innerHTML = data.results.map(item => `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-4 hover-lift group transition-all">
+                        <div class="relative">
+                            <img src="${item.ProfileImage ? API_BASE + '/uploads/' + item.ProfileImage : 'https://placehold.co/100'}" class="w-16 h-16 rounded-full border-2 border-gray-100 object-cover group-hover:border-teal-200 transition-colors">
+                            <span class="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
+                        </div>
+                        
+                        <div class="flex-grow text-center sm:text-left">
+                            <h4 class="font-bold text-gray-800 text-lg">${item.FirstName} ${item.LastName}</h4>
+                            <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-1">
+                                <span class="bg-orange-50 text-orange-600 text-xs px-2.5 py-0.5 rounded-lg font-bold border border-orange-100">
+                                    <i class="fas fa-clock mr-1"></i> มีเวร: ${item.ShiftName}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2"><i class="far fa-calendar-alt mr-1"></i> ${formatDate(item.Nurse_Date)}</p>
+                        </div>
+
+                        <button onclick="openRequestModal('${item.UserID}', '${item.FirstName}', '${item.schedule_id}')" class="bg-gray-900 hover:bg-black text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-gray-200 transition transform active:scale-95 whitespace-nowrap">
+                            ขอแลก <i class="fas fa-exchange-alt ml-1"></i>
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                countLabel.innerText = "0 รายการ";
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-white/50 rounded-3xl border border-dashed border-gray-200">
+                        <i class="fas fa-user-slash text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-400">ไม่พบเพื่อนร่วมงานในกะนี้</p>
+                    </div>`;
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'เกิดข้อผิดพลาดในการเชื่อมต่อ' });
+        }
+    }
+
+    // --- My Posts & Incoming ---
+    async function loadMyPosts() {
+        // Implement Fetch logic here...
+        // Use Skeleton before fetch
+        const container = document.getElementById('my-posts-list');
+        // container.innerHTML = ...skeleton...
+        
+        // Mock Empty
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-gray-400 py-10">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                   <i class="fas fa-history text-gray-300"></i>
+                </div>
+                <span class="text-xs">ยังไม่มีรายการโพสต์</span>
+            </div>`;
+    }
+
+    async function loadIncomingRequests() {
+        // Implement Fetch logic here...
+        // Mock Empty
+        const container = document.getElementById('incoming-list');
+        container.innerHTML = `
+            <div class="flex flex-col items-center justify-center h-full text-gray-400 py-10">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                   <i class="fas fa-inbox text-gray-300"></i>
+                </div>
+                <span class="text-xs">ไม่มีคำขอใหม่</span>
+            </div>`;
+    }
+
+    // --- Modal Logic ---
+    async function openRequestModal(targetUserId, targetName, targetScheduleId) {
+        document.getElementById('modal-target-name').innerText = targetName;
+        document.getElementById('modal-target-user-id').value = targetUserId;
+        document.getElementById('modal-target-schedule-id').value = targetScheduleId;
+        
+        const modal = document.getElementById('requestModal');
+        const content = document.getElementById('modalContent');
+        
+        modal.classList.remove('hidden');
+        // Animation
+        requestAnimationFrame(() => {
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        });
+
+        // Load My Shifts (Mockup)
+        const select = document.getElementById('my-offer-shift');
+        // fetch here...
+        select.innerHTML = '<option value="">-- จำลองเวรของคุณ --</option><option value="1">10 ธ.ค. - เช้า</option>'; 
+    }
+
+    function closeRequestModal() {
+        const modal = document.getElementById('requestModal');
+        const content = document.getElementById('modalContent');
+        
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    async function handleSendRequest(e) {
+        e.preventDefault();
+        // Add Logic
+        closeRequestModal();
+        Swal.fire({
+            icon: 'success',
+            title: 'ส่งคำขอสำเร็จ!',
+            text: 'กรุณารอการตอบรับจากเพื่อนร่วมงาน',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+
+    function formatDate(dateStr) {
+        if(!dateStr) return "-";
+        return new Date(dateStr).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    
+    // Custom Scrollbar CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    `;
+    document.head.appendChild(style);
+
+</script>
+</body>
+</html>
